@@ -1,20 +1,20 @@
 import functools
 
-def process_input(input_name: str):
+def process_input(input_name: str) -> list[str]:
     with open(input_name, "r") as f:
         lines = [line.replace("\n", "") for line in f.readlines()]
     return lines
 
-def get_obstacles_per_line(lines: str):
+def get_obstacles_per_line(lines: str) -> list[list[int]]:
     return [[i for i, char in enumerate(line) if char == '#'] for line in lines]
 
-def get_obstacles_per_column(lines: str):
+def get_obstacles_per_column(lines: str) -> list[list[int]]:
     obstacles_per_column = []
     for j in range(len(lines[0])):
         obstacles_per_column.append([i for i, line in enumerate(lines) if line[j]  == '#'])
     return obstacles_per_column
 
-def is_guard(letter: str):
+def is_guard(letter: str) -> tuple[bool, tuple[int, int]]:
     if letter == "^":
         return True, (-1, 0)
     if letter == ">":
@@ -25,21 +25,21 @@ def is_guard(letter: str):
         return True, (1, 0)
     return False, None
 
-def find_guard(lines: list[str]):
+def find_guard(lines: list[str]) -> tuple[int, int, tuple[int, int]]:
     for i, line in enumerate(lines):
         for j, letter in enumerate(line):
             res, direction = is_guard(letter)
             if res: return (i,j, direction)
     return None
 
-def is_obstacle(lines, i, j, i_obstacle: int = -1, j_obstacle: int = -1):
+def is_obstacle(lines: list[str], i: int, j: int, i_obstacle: int = -1, j_obstacle: int = -1) -> bool:
     return lines[i][j] == "#" or (i == i_obstacle and j == j_obstacle)
 
-def next_direction(direction):
+def next_direction(direction: tuple[int, int]) -> tuple[int, int]:
     dx, dy = direction
     return (dy, -dx)
 
-def walk_one(lines, i, j, direction, i_obstacle= -1, j_obstacle = -1):
+def walk_one(lines: list[str], i: int, j: int, direction:tuple[int, int], i_obstacle:int= -1, j_obstacle:int = -1) -> tuple[bool, int, int]:
     dx, dy = direction
     out_of_bound = is_out_of_bound(lines, i+dx, j+dy)
     if out_of_bound:
@@ -50,15 +50,15 @@ def walk_one(lines, i, j, direction, i_obstacle= -1, j_obstacle = -1):
     return True, i+dx, j+dy
 
 def walk_guard_to_obstacle(
-    lines,
-    i0,
-    j0,
-    direction,
-    set_of_visited_positions,
-    add_direction=False,
-    i_obstacle=-1,
-    j_obstacle=-1,
-):
+    lines: list[str],
+    i0: int,
+    j0: int,
+    direction:tuple[int, int],
+    set_of_visited_positions: list[tuple[int, int]],
+    add_direction: bool=False,
+    i_obstacle: int=-1,
+    j_obstacle: int=-1,
+) -> tuple[int, int, tuple[int, int]]:
     dx, dy = direction
     i, j = i0, j0
     continue_walking = True
@@ -74,7 +74,7 @@ def walk_guard_to_obstacle(
     return i, j, next_direction(direction)
 
 @functools.cache
-def walk_to_obstacle_linear(i, list_of_obstacles, dir):
+def walk_to_obstacle_linear(i: int, list_of_obstacles: list[int], dir: tuple[int, int]):
     if dir == 1: # going "forwards"
         higher = [o for o in list_of_obstacles if o > i]
         if len(higher) == 0:
@@ -89,20 +89,20 @@ def walk_to_obstacle_linear(i, list_of_obstacles, dir):
             return max(lower)+1
 
 
-def insert_obstacle(obstacles, new_obstacle):
+def insert_obstacle(obstacles: list[int], new_obstacle:int):
     return [o for o in obstacles if o < new_obstacle] + [new_obstacle] +  [o for o in obstacles if o > new_obstacle]
 
 def walk_guard_to_obstacle_v2(
-    obstacles_per_line,
-    obstacles_per_column,
-    i0,
-    j0,
-    direction,
-    set_of_visited_positions,
-    add_direction=False,
-    i_obstacle=-1,
-    j_obstacle=-1,
-):
+    obstacles_per_line: list[list[int]],
+    obstacles_per_column: list[list[int]],
+    i0: int,
+    j0: int,
+    direction: tuple[int, int],
+    set_of_visited_positions: list[tuple[int, int]],
+    add_direction:bool=False,
+    i_obstacle:int=-1,
+    j_obstacle:int=-1,
+) -> tuple[int, int, tuple[int, int]]:
     if direction in [(-1, 0), (1, 0)]:
         obstacles = insert_obstacle(obstacles_per_column[j0], i_obstacle) if j_obstacle == j0 else obstacles_per_column[j0]
         new_i = walk_to_obstacle_linear(i0, tuple(obstacles), direction[0])
@@ -119,12 +119,12 @@ def walk_guard_to_obstacle_v2(
         i, j = i0, new_j
     return i, j, next_direction(direction)
 
-def is_out_of_bound(lines, i, j):
+def is_out_of_bound(lines: list[str], i:int, j:int) -> bool:
     if i < 0 or j < 0 or i >= len(lines) or j >= len(lines[0]):
         return True
     return False
 
-def get_set_of_visisted_positions(lines):
+def get_set_of_visisted_positions(lines: list[str]) -> list[tuple[int, int]]:
     i0, j0, dir0 = find_guard(lines)
     set_of_visited_positions = set()
     i, j, direction = i0, j0, dir0
@@ -135,7 +135,7 @@ def get_set_of_visisted_positions(lines):
             break # out of bounds
     return set_of_visited_positions
 
-def is_a_loop(lines, i_obstacle, j_obstacle):
+def is_a_loop(lines: list[str], i_obstacle: int, j_obstacle: int) -> bool:
     i0, j0, dir0 = find_guard(lines)
     set_of_visited_positions_with_direction = set()
     i, j, direction = i0, j0, dir0
@@ -156,7 +156,7 @@ def is_a_loop(lines, i_obstacle, j_obstacle):
         if direction is None:
             return False # out of bounds
 
-def is_a_loop_v2(lines, obstacles_per_line, obstacles_per_column, i_obstacle, j_obstacle):
+def is_a_loop_v2(lines: list[str], obstacles_per_line:list[list[int]], obstacles_per_column: list[list[int]], i_obstacle: int, j_obstacle: int) -> bool:
     i0, j0, dir0 = find_guard(lines)
     set_of_visited_positions_with_direction = set()
     i, j, direction = i0, j0, dir0
@@ -200,7 +200,7 @@ def solve_2(input_name: str) -> int:
             total += 1
     return total
 
-def better_solve_2(input_name):
+def better_solve_2(input_name: str) -> int:
     lines = process_input(input_name)
     obstacles_per_line = get_obstacles_per_line(lines)
     obstacles_per_column = get_obstacles_per_column(lines)
