@@ -41,6 +41,7 @@ def solve_2(input_name: str, verbose: bool = False) -> int:
                 printv(verbose, "  i =", i, " - current bank available = ", current_bank)
                 bat = max(current_bank)
             else:
+                
                 printv(verbose, "  i =", i, " - current bank available = ", current_bank[:-(N_bat-i-1)])
                 bat = max(current_bank[:-(N_bat-i-1)])
             bat_index = current_bank.index(bat)
