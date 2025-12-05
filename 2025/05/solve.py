@@ -61,7 +61,7 @@ def fusion_multiple(intervals):
         return fusion_multiple([fusion(intervals[0], intervals[1])] + intervals[2:])
 
 
-def add_interval(interval_list: list[tuple[int, int]], new_interval: tuple[int, int]):
+def add_interval(interval_list: list[tuple[int, int]], new_interval: tuple[int, int], verbose:bool = False):
     new_list = []
     if len(interval_list) == 0:
         return [new_interval]
@@ -71,7 +71,8 @@ def add_interval(interval_list: list[tuple[int, int]], new_interval: tuple[int, 
             collision_intervals.append(existing_interval)
         else:
             new_list.append(existing_interval)
-    new_list.append(fusion_multiple(collision_intervals))
+    fusionned = fusion_multiple(collision_intervals)
+    new_list.append(fusionned)
     return new_list
 
 
@@ -84,14 +85,14 @@ def total_count(interval_list):
 
 def solve_2(input_name: str, verbose: bool = False) -> int:
     ranges, _ = process_input(input_name)
-    # printv(verbose, ranges)
+    printv(verbose, ranges)
 
     interval_list = []
     count = 0
     for fresh_range in ranges:
         printv(verbose, interval_list)
         printv(verbose, "  adding", fresh_range)
-        interval_list = add_interval(interval_list, fresh_range)
+        interval_list = add_interval(interval_list, fresh_range, verbose)
         new_count = total_count(interval_list)
         if not count <= new_count:
             raise ValueError
@@ -102,10 +103,10 @@ def solve_2(input_name: str, verbose: bool = False) -> int:
 
 
 if __name__ == "__main__":
-    # value_1 = solve_1(input_name="small_input.txt", verbose=True)
-    # print("Part 1, small input:", value_1)
-    # value_1 = solve_1(input_name="input.txt", verbose=False)
-    # print("Part 1:", value_1)
+    value_1 = solve_1(input_name="small_input.txt", verbose=True)
+    print("Part 1, small input:", value_1)
+    value_1 = solve_1(input_name="input.txt", verbose=False)
+    print("Part 1:", value_1)
     value_2 = solve_2(input_name="small_input.txt", verbose=True)
     print("Part 2, small input:", value_2)
     value_2 = solve_2(input_name="input.txt", verbose=False)
